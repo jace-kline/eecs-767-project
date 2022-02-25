@@ -5,7 +5,6 @@
 
 typedef std::string term_t;
 typedef std::string path_t;
-typedef std::map<path_t, file_term_record_t> file_record_map_t;
 
 // information about an instance of a term located within a file
 struct term_instance_t {
@@ -19,12 +18,14 @@ struct file_term_record_t {
     // std::vector<unsigned int> locs;
 };
 
+typedef std::map<path_t, file_term_record_t> file_record_map_t;
+
 // all the information that a given term is mapped to
 // includes document frequency (df), term frequency (tf), and a map of file paths to records
 struct posting_t {
-    unsigned int df;
-    unsigned int tf;
-    file_record_map_t file_record_map;
+    unsigned int df; // document frequency
+    unsigned int tf; // term frequency
+    file_record_map_t file_record_map; // files associated with term
 };
 
 #endif
