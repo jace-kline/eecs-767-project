@@ -36,12 +36,12 @@ std::string normalize(std::string term) {
     return term;
 }
 
-// return false if file is not readable OR not to be considered in indexing
-// must supply a path to the file and a reference to a vector to store the terms (strings + locations)
-bool collectFileTermInstances(std::string path, std::vector<term_instance_t>& terminstances) {
-    std::ifstream fs(path);
+// returns false if can't open file at given path
+// assumes empty vector to fill
+std::vector<term_instance_t> collectTerms(std::ifstream &fs) {
 
-    if(!fs) return false; // If can't create stream, return false
+    // collect terms
+    std::vector<term_instance_t> terminstances;
 
     char c;
     std::string term;
@@ -56,12 +56,14 @@ bool collectFileTermInstances(std::string path, std::vector<term_instance_t>& te
         }
         loc++;
     }
-
     fs.close();
-    return true;
+
+    // if all pass, then return (move semantics)
+    return terminstances;
 }
 
-void buildFileTermRecords(std::vector<term_instance_t>& terminstances, std::map<std::string, file_term_record_t>& term_file_map) {
+std::map<std::string, file_term_record_t> buildFileTermRecords(std::vector<term_instance_t>& terminstances) {
+    std::map<std::string, file_term_record_t> term_file_map;
     for(term_instance_t t : terminstances) {
         auto iter = term_file_map.find(t.term);
         if(iter != term_file_map.end()) {
@@ -71,6 +73,43 @@ void buildFileTermRecords(std::vector<term_instance_t>& terminstances, std::map<
             term_file_map.insert(std::pair{ t.term, record });
         }
     }
+
+    return term_file_map;
+}
+
+std::map<std::string, file_term_record_t> parseFile(std::string path) {
+
+    // try to create input file stream for provided path
+    std::ifstream fs(path);
+    if(!fs) return std::map<std::string, file_term_record_t>();
+
+    // collect term instances
+    std::vector<term_instance_t> terminstances = collectTerms(fs);
+
+    // check distribution of terms to see if its a likely text file?
+
+    // build records for each term in this file & return
+    return buildFileTermRecords(terminstances);
+}
+
+
+posting_list_t buildPostingList(path_t rootPath) {
+    // initialize an empty posting list
+    PostingList posting_list;
+
+    // initialize a filesystem iterator (recursive)
+    FileIterator iter = FileIterator(rootPath);
+    std::optional<path_t> _path;
+    path_t path;
+
+    while(!(_path = iter.next())) {
+        path = _path.value();
+
+        std::map<term_t, file_term_record_t> term_file_map = parseFile(path);
+
+        posting_list.update(term_file_map);
+    }
+
 }
 
 // void indexFile(std::string path) {
@@ -81,30 +120,50 @@ void buildFileTermRecords(std::vector<term_instance_t>& terminstances, std::map<
 //     if (validfile) buildFileTermRecords(terminstances, term_file_map);
 // }
 
-void collectFileTermInstances_test() {
-    std::string path = "./scrape.cpp";
-    std::vector<term_instance_t> terminstances;
-    std::map<std::string, file_term_record_t> term_file_map;
+// void collectFileTermInstances_test() {
+//     std::string path = "./scrape.cpp";
+//     std::vector<term_instance_t> terminstances;
+//     std::map<std::string, file_term_record_t> term_file_map;
 
-    bool validfile = collectFileTermInstances(path, terminstances);
-    if (validfile) buildFileTermRecords(terminstances, term_file_map);
+//     bool validfile = collectFileTermInstances(path, terminstances);
+//     if (validfile) buildFileTermRecords(terminstances, term_file_map);
 
-    for(auto pair : term_file_map) {
-        std::cout << pair.first << " " << pair.second.freq << std::endl;
-    }
-}
+//     for(auto pair : term_file_map) {
+//         std::cout << pair.first << " " << pair.second.freq << std::endl;
+//     }
+// }
 
-void listFiles(std::string rootPath) {
-    for(const std::filesystem::directory_entry& dentry : std::filesystem::recursive_directory_iterator(rootPath)) {
-        std::filesystem::path path = dentry.path();
-        if(!dentry.is_regular_file()) {
-            std::cout << "Directory: " << dentry << std::endl;
-        } else {
-            std::cout << "Filename: " << path.filename() 
-            << " extension: " << path.extension() 
-            << " textfile?: " << isAsciiTextFile(path)
-            << std::endl;
+// void listFiles(std::string rootPath) {
+//     for(const std::filesystem::directory_entry& dentry : std::filesystem::recursive_directory_iterator(rootPath)) {
+//         std::filesystem::path path = dentry.path();
+//         if(!dentry.is_regular_file()) {
+//             std::cout << "Directory: " << dentry << std::endl;
+//         } else {
+//             std::cout << "Filename: " << path.filename() 
+//             << " extension: " << path.extension() 
+//             << " textfile?: " << isAsciiTextFile(path)
+//             << std::endl;
+//         }
+//     }
+// }
+
+class FileIterator {
+    private:
+    std::filesystem::recursive_directory_iterator file_iter;
+
+    public:
+    FileIterator(path_t rootPath) 
+    : file_iter(std::filesystem::recursive_directory_iterator(rootPath)) {}
+
+    // fetches next file
+    // returns nullopt if end of recursion
+    std::optional<path_t> next() {
+        if(file_iter == end(file_iter)) return std::nullopt;
+        while(!file_iter->is_regular_file()) {
+            if(file_iter == end(file_iter)) return std::nullopt;
+            file_iter++;
         }
+        return file_iter->path();
     }
 }
 
