@@ -7,10 +7,14 @@ bool posting_list_t::update(path_t path, file_term_record_t record) {
     // update document frequency and term frequency
     df++;
     tf += record.freq;
+
+    return true;
 }
 
 
 bool inverted_index_t::update(path_t path, std::map<term_t, file_term_record_t> &term_file_map) {
+
+    std::map<term_t, posting_list_t>::iterator help_iter = index.begin();
 
     for(auto pair : term_file_map) {
         term_t term = pair.first;
@@ -29,7 +33,10 @@ bool inverted_index_t::update(path_t path, std::map<term_t, file_term_record_t> 
             };
 
             // insert the term and update the iterator
-            it = index.insert({ term, posting_list }).first;
+            it = index.insert(help_iter, { term, posting_list });
+
+            // update the help iterator to the spot of the latest term
+            help_iter = it;
         }
 
         // insert the [file -> record] mapping into the posting list map
@@ -40,12 +47,18 @@ bool inverted_index_t::update(path_t path, std::map<term_t, file_term_record_t> 
     return true;
 }
 
-inverted_index_t buildInvertedIndex(path_t rootPath) {
-    // initialize an empty inverted index
-    inverted_index_t index;
+inverted_index_t indexFilesystem(path_t rootPath) {
 
     // recurse over filesystem and gather all file paths (ordered by path string)
     std::set<path_t> paths = scrapeFilePaths(rootPath);
+
+    return buildInvertedIndex(paths);
+
+}
+
+inverted_index_t buildInvertedIndex(std::set<path_t> &paths) {
+    // initialize an empty inverted index
+    inverted_index_t index;
 
     for(path_t path : paths) {
         std::optional<std::map<term_t, file_term_record_t>> valid_result;
@@ -57,5 +70,4 @@ inverted_index_t buildInvertedIndex(path_t rootPath) {
     }
 
     return index;
-
 }

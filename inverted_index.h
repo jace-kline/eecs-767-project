@@ -22,6 +22,8 @@ struct inverted_index_t {
     bool update(path_t path, std::map<term_t, file_term_record_t> &term_file_map);
 };
 
-inverted_index_t buildInvertedIndex(path_t rootPath);
+inverted_index_t indexFilesystem(path_t rootPath);
+
+inverted_index_t buildInvertedIndex(std::set<path_t> &paths);
 
 #endif
