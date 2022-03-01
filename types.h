@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include <string>
+#include <map>
 
 typedef std::string term_t;
 typedef std::string path_t;
@@ -16,14 +17,6 @@ struct term_instance_t {
 struct file_term_record_t {
     unsigned int freq;
     // std::vector<unsigned int> locs;
-};
-
-// all the information that a given term is mapped to
-// includes document frequency (df), term frequency (tf), and a map of file paths to records
-struct posting_t {
-    unsigned int df; // document frequency
-    unsigned int tf; // term frequency
-    std::map<path_t, file_term_record_t> file_record_map; // files associated with term
 };
 
 #endif
