@@ -1,17 +1,7 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <set>
-#include <filesystem>
-#include <bits/stdc++.h>
-#include <ctime>
+#include "Scraper.h"
 
-#include "types.h"
-
-// returns a std::set of sorted file path strings
-std::set<path_t> scrapeFilePaths(path_t rootPath) {
-    std::set<path_t> paths;
+std::set<path_t> Scraper::scrapePaths(path_t rootPath) {
+    std::set<document_t> paths;
 
     for(const std::filesystem::directory_entry& dentry : std::filesystem::recursive_directory_iterator(rootPath)) {
         std::filesystem::path path = dentry.path();
