@@ -5,6 +5,7 @@
 #include "text/TextProcessor.h"
 #include "index/Index.h"
 #include "shared/utils.h"
+#include "score/VectorModelScorer.h"
 
 void test_scrapePaths(path_t rootPath) {
     clock_t taken = clock();
@@ -50,6 +51,22 @@ void test_buildIndex(path_t rootPath) {
     Index index = buildIndex(rootPath);
     std::cout << "documents: " << index.num_documents() << std::endl;
     std::cout << "terms: " << index.num_terms() << std::endl;
+
+    document_t doc = "/home/jacekline/dev/eecs-767/eecs-767-project/stories/3lpigs.txt";
+    term_t term = "pig";
+    std::cout << index.tf(term, doc) << std::endl;
+}
+
+void test_buildVectorModelScorer(path_t rootPath) {
+    Index index = buildIndex(rootPath);
+    VectorModelScorer scorer = VectorModelScorer(index);
+
+    document_t doc = "/home/jacekline/dev/eecs-767/eecs-767-project/stories/3lpigs.txt";
+    term_t query = "three little pig";
+
+    double score = scorer.score(TextProcessor::processQuery(query), doc);
+
+    std::cout << score << std::endl;
 }
 
 // void test_indexFilesystem(path_t rootPath) {
@@ -72,9 +89,10 @@ void test_buildIndex(path_t rootPath) {
 
 
 int main() {
-    // test_indexFilesystem("/home/jacekline/dev/eecs-767/eecs-767-project");
+    // test_scrapePaths("/home/jacekline/dev/eecs-767/eecs-767-project/stories");
     // test_processFile("/home/jacekline/dev/eecs-767/eecs-767-project/stories/3wishes.txt");
     // test_processQuery("once upon a time there was a big bad wolf. You're a nice fellow. TIME goes on. HELLO WOLF.");
     test_buildIndex("/home/jacekline/dev/eecs-767/eecs-767-project/stories");
+    // test_buildVectorModelScorer("/home/jacekline/dev/eecs-767/eecs-767-project/stories");
     return 0;
 }

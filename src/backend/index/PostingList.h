@@ -8,6 +8,9 @@ class PostingList {
         frequency_t term_freq;
         std::map<document_t, frequency_t> document_freq_map; // files associated with term
 
+        // allow Index class to access private members
+        friend class Index;
+
     public:
         PostingList();
 
