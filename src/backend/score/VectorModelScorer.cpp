@@ -18,8 +18,6 @@ VectorModelScorer::VectorModelScorer(
 }
 
 void VectorModelScorer::compute_document_vectors() {
-    // clear document vectors map
-    document_vectors.clear();
 
     // for each [document -> term] mapping...
     for(const auto& doc_terms_pair : index.document_index) {
@@ -57,11 +55,23 @@ double VectorModelScorer::score(const std::map<term_t, frequency_t>& query_term_
     if(it == document_vectors.end()) return 0.0;
 
     const DocumentVector& dv = it->second;
+    DocumentVector qv = compute_document_vector(query_term_freqs);
 
+    return dv.cosine_similarity(qv);
+}
+
+std::optional<const DocumentVector *> VectorModelScorer::get_document_vector(document_t doc) const {
+    auto it = document_vectors.find(doc);
+    if(it == document_vectors.end()) return std::nullopt;
+
+    return &it->second;
+}
+
+std::map<term_t, weight_t> VectorModelScorer::compute_weights(const std::map<term_t, frequency_t>& term_freqs) const {
     // create a map to store [term -> weight] mapping
     std::map<term_t, weight_t> term_weight_map;
 
-    for(const auto& term_freq_pair : query_term_freqs) {
+    for(const auto& term_freq_pair : term_freqs) {
         term_t term = term_freq_pair.first;
         frequency_t _tf = term_freq_pair.second;
 
@@ -72,8 +82,11 @@ double VectorModelScorer::score(const std::map<term_t, frequency_t>& query_term_
         term_weight_map.insert(term_weight_map.end(), {term, _w});
     }
 
-    // construct query's DocumentVector from map
-    DocumentVector qv(std::move(term_weight_map));
+    return term_weight_map;
+}
 
-    return dv.cosine_similarity(qv);
+DocumentVector VectorModelScorer::compute_document_vector(const std::map<term_t, frequency_t>& term_freqs) const {
+    
+    // construct DocumentVector from map
+    return DocumentVector(compute_weights(term_freqs));
 }

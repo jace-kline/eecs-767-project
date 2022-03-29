@@ -38,8 +38,15 @@ class VectorModelScorer : private ScorerInterface {
     // cosine similarity score
     double score(const std::map<term_t, frequency_t>& query_term_freqs, document_t d);
 
-    // // cosine similarity score
-    // Ranking ranking(query_t q);
+    // get the document vector from a document name
+    // if not found, return std::nullopt
+    std::optional<const DocumentVector *> get_document_vector(document_t doc) const;
+
+    // compute [term -> weight] map given a [term -> freq map]
+    std::map<term_t, weight_t> compute_weights(const std::map<term_t, frequency_t>& term_freqs) const;
+
+    // compute a document vector from a given [term -> freq] map
+    DocumentVector compute_document_vector(const std::map<term_t, frequency_t>& term_freqs) const;
 };
 
 #endif

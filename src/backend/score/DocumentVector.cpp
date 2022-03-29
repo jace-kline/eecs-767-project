@@ -1,19 +1,23 @@
 #include "DocumentVector.h"
 
 DocumentVector::DocumentVector(std::map<term_t, weight_t>&& term_weights) : term_weight_map(term_weights) {
-    magnitude = compute_magnitude();
+    mag = compute_magnitude();
 }
 
 double DocumentVector::compute_magnitude() const {
-    unsigned int sum_squares = 0;
+    double sum_squares = 0.0;
     for(const auto& pair : term_weight_map) {
         sum_squares += pow(pair.second, 2);
     }
     
-    return sqrt((double) sum_squares);
+    return sqrt(sum_squares);
 }
 
-double DocumentVector::operator*(const DocumentVector& rhs) const {
+double DocumentVector::magnitude() const {
+    return mag;
+}
+
+double DocumentVector::dot(const DocumentVector& rhs) const {
     // start iterators at beginning of each map
     auto it_lhs = this->term_weight_map.begin();
     auto it_rhs = rhs.term_weight_map.begin();
@@ -42,5 +46,5 @@ double DocumentVector::operator*(const DocumentVector& rhs) const {
 }
 
 double DocumentVector::cosine_similarity(const DocumentVector& rhs) const {
-    return (*this * rhs) / (this->magnitude * rhs.magnitude);
+    return (this->dot(rhs)) / (this->mag * rhs.mag);
 }

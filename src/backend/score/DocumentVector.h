@@ -8,7 +8,7 @@
 class DocumentVector {
     private:
     std::map<term_t, weight_t> term_weight_map;
-    double magnitude;
+    double mag;
 
     protected:
     // called in constructor
@@ -25,8 +25,11 @@ class DocumentVector {
     // // vector subtraction
     // DocumentVector operator-(const DocumentVector& rhs) const;
 
+    // get the magnitude of the vector
+    double magnitude() const;
+
     // vector dot product
-    double operator*(const DocumentVector& rhs) const;
+    double dot(const DocumentVector& rhs) const;
 
     // cosine similarity
     double cosine_similarity(const DocumentVector& rhs) const;
