@@ -24,6 +24,9 @@ std::optional<token_t> TextProcessor::next_token(std::istream& is) {
         }
     }
 
+    // in the case we have a token built up when we hit EOF
+    if(!token.empty()) return token;
+
     return std::nullopt;
 }
 

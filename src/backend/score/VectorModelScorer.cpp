@@ -60,6 +60,15 @@ double VectorModelScorer::score(const std::map<term_t, frequency_t>& query_term_
     return dv.cosine_similarity(qv);
 }
 
+double VectorModelScorer::score(const std::map<term_t, frequency_t>& lhs_term_freqs, const std::map<term_t, frequency_t>& rhs_term_freqs) {
+
+    // transform each [term->freq] map to a DocumentVector
+    DocumentVector lv = compute_document_vector(lhs_term_freqs);
+    DocumentVector rv = compute_document_vector(rhs_term_freqs);
+
+    return lv.cosine_similarity(rv);
+}
+
 std::optional<const DocumentVector *> VectorModelScorer::get_document_vector(document_t doc) const {
     auto it = document_vectors.find(doc);
     if(it == document_vectors.end()) return std::nullopt;

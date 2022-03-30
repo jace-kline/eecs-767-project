@@ -4,7 +4,8 @@
 #include "../shared/types.h"
 #include "../shared/utils.h"
 #include "PostingList.h"
-#include <vector>
+#include <set>
+#include <optional>
 
 // store this in the document_index
 // gives us a "shortcut" to posting to access df info
@@ -44,22 +45,30 @@ class Index {
         // number of times a given term appears in a given doc
         frequency_t tf(term_t term, document_t doc) const;
 
-        // // inverse document frequency of given term
-        // double idf(term_t term) const;
-
-        // // tf-idf weight of given (term, doc) pair
-        // // w(t,d) = tf(t,d) * idf(t)
-        // double w(term_t term, document_t doc) const;
-
         // provide document name, and map of { term -> freq }
         // the map is MOVED to this index and therefore no longer usable by provider (move semantics)
         // return true if update successful, otherwise false
         bool update(document_t, std::map<term_t, frequency_t>&&);
 
-        // // don't call this until finished indexing
-        // // produces a map of {document -> document vector}
-        // // to be used in similarity calculations/scoring
-        // std::map<document_t, DocumentVector> make_document_vectors() const;
+        // given a set of (ordered) terms, return terms present in target document
+        std::optional<std::set<term_t>> shared_terms(
+            const std::set<term_t>& term_set,
+            document_t doc
+        ) const;
+
+        // return a set of all terms
+        std::set<term_t> all_terms() const;
+
+        // return a set of all documents
+        std::set<document_t> all_documents() const;
+
+        // return a set of the terms found in a document
+        // if document not in index, return std::nullopt
+        std::optional<std::set<term_t>> document_terms(document_t doc) const;
+
+        // return a set of documents a given term is in
+        // if term not in index, return std::nullopt
+        std::optional<std::set<document_t>> term_documents(term_t term) const;
 };
 
 #endif

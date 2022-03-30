@@ -2,6 +2,7 @@
 #define DOCUMENT_VECTOR_H
 
 #include "../shared/types.h"
+#include "../shared/utils.h"
 #include <map>
 #include <math.h>
 

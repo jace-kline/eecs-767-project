@@ -18,30 +18,36 @@ double DocumentVector::magnitude() const {
 }
 
 double DocumentVector::dot(const DocumentVector& rhs) const {
-    // start iterators at beginning of each map
-    auto it_lhs = this->term_weight_map.begin();
-    auto it_rhs = rhs.term_weight_map.begin();
+    // // start iterators at beginning of each map
+    // auto it_lhs = this->term_weight_map.begin();
+    // auto it_rhs = rhs.term_weight_map.begin();
+
+    // double agg = 0;
+    // // while neither iterator has hit the end...
+    // while(it_lhs != this->term_weight_map.end() && it_rhs != rhs.term_weight_map.end()) {
+
+    //     // if terms are equal, multiply the weights and add to running sum
+    //     if(it_lhs->first == it_rhs->first) {
+    //         agg += it_lhs->second * it_rhs->second;
+    //         it_lhs++;
+    //         it_rhs++;
+    //     } 
+    //     // if lhs term < rhs term, increment lhs iterator
+    //     else if (it_lhs->first < it_rhs->first) {
+    //         it_lhs++;
+    //     } 
+    //     // otherwise, increment rhs iterator
+    //     else {
+    //         it_rhs++;
+    //     }
+    // }
+
+    // return agg;
 
     double agg = 0;
-    // while neither iterator has hit the end...
-    while(it_lhs != this->term_weight_map.end() && it_rhs != rhs.term_weight_map.end()) {
-
-        // if terms are equal, multiply the weights and add to running sum
-        if(it_lhs->first == it_rhs->first) {
-            agg += it_lhs->second * it_rhs->second;
-            it_lhs++;
-            it_rhs++;
-        } 
-        // if lhs term < rhs term, increment lhs iterator
-        else if (it_lhs->first < it_rhs->first) {
-            it_lhs++;
-        } 
-        // otherwise, increment rhs iterator
-        else {
-            it_rhs++;
-        }
+    for(const auto& triple : utils::merge_maps_on_keys<term_t, weight_t, weight_t>(this->term_weight_map, rhs.term_weight_map)) {
+        agg += std::get<1>(triple) * std::get<2>(triple);
     }
-
     return agg;
 }
 

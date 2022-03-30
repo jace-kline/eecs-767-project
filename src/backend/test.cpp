@@ -32,7 +32,7 @@ void test_processQuery(query_t query) {
     // for (auto pair : _map) {
     //     std::cout << pair.first << " -> " << pair.second << std::endl;
     // }
-    output_map(_map, 0, std::cout);
+    utils::output_map(_map, 0, std::cout);
 }
 
 Index buildIndex(path_t rootPath) {
@@ -57,16 +57,43 @@ void test_buildIndex(path_t rootPath) {
     std::cout << index.tf(term, doc) << std::endl;
 }
 
-void test_VectorModelScorer(path_t rootPath) {
-    Index index = buildIndex(rootPath);
-    VectorModelScorer scorer = VectorModelScorer(index);
-
+void test_VectorModelScorer() {
+    path_t rootPath = "/home/jacekline/dev/eecs-767/eecs-767-project/stories";
     document_t doc = "/home/jacekline/dev/eecs-767/eecs-767-project/stories/3lpigs.txt";
     term_t query = "three little pig";
 
-    double score = scorer.score(TextProcessor::processQuery(query), doc);
+    Index index = buildIndex(rootPath);
+    VectorModelScorer scorer = VectorModelScorer(index);
 
-    std::cout << score << std::endl;
+    auto query_map = TextProcessor::processQuery(query);
+    std::set<term_t> query_terms = utils::keys(query_map);
+
+    // for(document_t doc : index.all_documents()) {
+    //     std::cout << doc << std::endl;
+    // }
+
+    // for(term_t term : index.all_terms()) {
+    //     std::cout << term << std::endl;
+    // }
+
+    // for(term_t term : query_terms) {
+    //     std::cout << term << std::endl;
+    // }
+
+    // if(auto _opt = index.document_terms(doc)) {
+    //     for(term_t term : _opt.value()) {
+    //         std::cout << term << std::endl;
+    //     }
+    // }
+
+    std::cout << "Shared terms:" << std::endl;
+    if(auto _opt = index.shared_terms(query_terms, doc)) {
+        for(term_t term : _opt.value()) {
+            std::cout << term << std::endl;
+        }
+    }
+
+    std::cout << "Score: " << scorer.score(query_map, doc) << std::endl;
 }
 
 void test_VectorModelScorer2() {
@@ -83,6 +110,9 @@ void test_VectorModelScorer2() {
     const DocumentVector* d_ptr = nullptr;
     if(auto _opt = scorer.get_document_vector(doc)) {
         d_ptr = _opt.value();
+    } else {
+        std::cout << "Invalid document name." << std::endl;
+        return;
     }
     const DocumentVector& d = *d_ptr;
     DocumentVector q = scorer.compute_document_vector(query_map);
@@ -91,6 +121,37 @@ void test_VectorModelScorer2() {
     std::cout << "q mag: " << q.magnitude() << std::endl;
     std::cout << "dot(d, q) = " << d.dot(q) << std::endl;
     std::cout << "cosine_similarity(d, q) = " << d.cosine_similarity(q) << std::endl;
+}
+
+void test_VectorModelScorer3() {
+
+    path_t rootPath = "/home/jacekline/dev/eecs-767/eecs-767-project/stories";
+    query_t d1 = "three little wolf";
+    query_t d2 = "three little pig";
+
+    Index index = buildIndex(rootPath);
+    VectorModelScorer scorer = VectorModelScorer(index);
+
+    std::map<term_t, frequency_t> m1 = TextProcessor::processQuery(d1);
+    std::map<term_t, frequency_t> m2 = TextProcessor::processQuery(d2);
+
+    auto merged_maps = utils::merge_maps_on_keys<term_t, frequency_t, frequency_t>(m1, m2);
+    std::cout << "Matched terms: " << std::endl;
+    for (const auto& triple : merged_maps) {
+        std::cout << "(" 
+        << std::get<0>(triple) << ", " 
+        << std::get<1>(triple) << ", "
+        << std::get<2>(triple)
+        << ")" << std::endl;
+    }
+
+    DocumentVector d1v = scorer.compute_document_vector(m1);
+    DocumentVector d2v = scorer.compute_document_vector(m2);
+
+    std::cout << "d1v mag: " << d1v.magnitude() << std::endl;
+    std::cout << "d2v mag: " << d2v.magnitude() << std::endl;
+    std::cout << "dot(d1v, d2v) = " << d1v.dot(d2v) << std::endl;
+    std::cout << "cosine_similarity(d1v, d2v) = " << d1v.cosine_similarity(d2v) << std::endl;
 }
 
 void test_DocumentVectors() {
@@ -119,6 +180,8 @@ void test_DocumentVectors() {
     std::cout << "cosine_similarity(vec1, vec2) = " << vec1.cosine_similarity(vec2) << std::endl;
 }
 
+
+
 // void test_indexFilesystem(path_t rootPath) {
 
 //     inverted_index_t inv_index = indexFilesystem(rootPath);
@@ -143,8 +206,9 @@ int main() {
     // test_processFile("/home/jacekline/dev/eecs-767/eecs-767-project/stories/3wishes.txt");
     // test_processQuery("once upon a time there was a big bad wolf. You're a nice fellow. TIME goes on. HELLO WOLF.");
     // test_buildIndex("/home/jacekline/dev/eecs-767/eecs-767-project/stories");
-    // test_VectorModelScorer("/home/jacekline/dev/eecs-767/eecs-767-project/stories");
+    test_VectorModelScorer();
     // test_DocumentVectors();
-    test_VectorModelScorer2();
+    // test_VectorModelScorer2();
+    // test_VectorModelScorer3();
     return 0;
 }

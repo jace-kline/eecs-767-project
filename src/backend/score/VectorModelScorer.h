@@ -35,8 +35,17 @@ class VectorModelScorer : private ScorerInterface {
     // if tf, idf formula are assumed to be standard definitions
     VectorModelScorer(const Index& idx);
 
-    // cosine similarity score
-    double score(const std::map<term_t, frequency_t>& query_term_freqs, document_t d);
+    // cosine similarity score between [term->freq] map and indexed document
+    double score(
+        const std::map<term_t, frequency_t>& query_term_freqs, 
+        document_t d
+    );
+
+    // cosine similarity score between two [term->freq] maps
+    double score(
+        const std::map<term_t, frequency_t>& lhs_term_freqs,
+        const std::map<term_t, frequency_t>& rhs_term_freqs
+    );
 
     // get the document vector from a document name
     // if not found, return std::nullopt
