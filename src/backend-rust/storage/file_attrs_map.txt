@@ -1,0 +1,6 @@
+/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/sample/file1.txt,25,1649030548,1
+/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/sample/file2.txt,22,1649030548,1
+/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/sample/file3.txt,16,1649030548,1
+/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/sample/file4.txt,27,1649030548,1
+/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/sample/file5.txt,26,1649030548,1
+/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/sample/file6.txt,29,1649030548,1

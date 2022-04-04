@@ -1,4 +1,7 @@
 {
+    "rust-analyzer.linkedProjects": [
+        "src/backend-rust/Cargo.toml"
+    ],
     "files.associations": {
         "any": "cpp",
         "array": "cpp",
