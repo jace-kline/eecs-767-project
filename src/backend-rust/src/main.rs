@@ -2,6 +2,8 @@
 pub mod scrape;
 pub mod utils;
 pub mod persistence;
+pub mod text;
+pub mod index;
 
 // const DOCROOT: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/stories";
 
