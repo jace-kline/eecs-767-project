@@ -5,8 +5,8 @@ use std::fmt::Debug;
 pub enum MapMergeResult<K,L,R> 
 where 
     K: Eq + Ord + Clone + Debug, 
-    L: Eq + Clone + Debug, 
-    R: Eq + Clone + Debug,
+    L: Clone, 
+    R: Clone,
 {
     Left(K, L),
     Right(K, R),
@@ -16,8 +16,8 @@ where
 pub fn merge_maps<K,L,R>(ml: &BTreeMap<K,L>, mr: &BTreeMap<K,R>) -> Vec<MapMergeResult<K,L,R>>
 where 
     K: Eq + Ord + Clone + Debug, 
-    L: Eq + Clone + Debug, 
-    R: Eq + Clone + Debug,
+    L: Clone, 
+    R: Clone,
 {
     let mut v : Vec<MapMergeResult<K,L,R>> = Vec::new();
 

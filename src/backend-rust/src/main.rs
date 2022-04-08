@@ -4,6 +4,7 @@ pub mod utils;
 pub mod persistence;
 pub mod text;
 pub mod index;
+pub mod score;
 
 // const DOCROOT: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/stories";
 
