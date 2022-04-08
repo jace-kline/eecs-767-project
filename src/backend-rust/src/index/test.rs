@@ -2,23 +2,10 @@ use std::collections::BTreeMap;
 use std::fmt::Debug;
 use super::indexer::*;
 use crate::text::process::text_process;
+use crate::utils::map::print_nested_maps;
 
 #[test]
 fn indexer_add_test() {
-
-    fn print_nested_maps<K1, K2, V>(map: &BTreeMap<K1,BTreeMap<K2, V>>)
-    where
-        K1: Debug,
-        K2: Debug,
-        V: Debug
-    {
-        for (k1, submap) in map.iter() {
-            println!("{:?} ->", k1);
-            for (k2, v) in submap.iter() {
-                println!("\t{:?} -> {:?}", k2, v);
-            }
-        }
-    }
 
     let mut indexer = Indexer::new();
 

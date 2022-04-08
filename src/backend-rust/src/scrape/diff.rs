@@ -3,7 +3,7 @@ use crate::utils;
 use crate::utils::io::{overwrite_file};
 use std::path::Path;
 use std::error::Error;
-use crate::utils::MapMergeResult;
+use crate::utils::map::MapMergeResult;
 
 pub enum ScrapeTag {
     New,   // for new files that should be parsed/indexed OR previously ignored files that have been modified
@@ -18,7 +18,7 @@ pub fn tag_scraped_files(
     scraped: &FileMap<FileInfo>,
     stored: &FileMap<FileInfo>
 ) -> Vec<(ScrapeTag, FilePath, FileInfo)> {
-    let merged = utils::merge_maps(scraped, stored);
+    let merged = utils::map::merge_maps(scraped, stored);
 
     merged
     .iter()

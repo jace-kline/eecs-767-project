@@ -62,11 +62,14 @@ impl Indexer {
     }
 
     // how many times term appears in document
-    pub fn tf(&self, term: &str, path: &str) -> Option<Frequency> {
+    pub fn tf(&self, term: &str, path: &str) -> Frequency {
         self.term_file_index
-            .get(term)?
-            .get(path)
-            .map(|n| *n)
+            .get(term)
+            .and_then(|map| 
+                map.get(path)
+                .map(|n| *n)
+            )
+            .unwrap_or(0)
     }
 
     // how many documents a term appears in

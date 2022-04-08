@@ -28,20 +28,13 @@ impl<'a> VectorModelScorer<'a> {
         DocumentVector::new(
             term_freq_map.iter().map(|(term, tf)| {
                 let df = indexer.df(&term).unwrap_or(0);
-                (term.to_string(), VectorModelScorer::tf_idf_formula(*tf, df, indexer.num_documents()))
+                (term.to_string(), tf_idf_formula(*tf, df, indexer.num_documents()))
             })
             .collect::<TermMap<Weight>>()
         )
     }
 
-    fn tf_idf_formula(tf: usize, df: usize, n: usize) -> Weight {
-        if df == 0 { 0.0 }
-        else {
-            tf as f64 * (f64::log10(n as f64 / df as f64))
-        }
-    }
-
-    pub fn score_query_doc(&self, term_freq_map: TermMap<Frequency>, doc: &str) -> Score {
+    pub fn score_query_doc(&self, term_freq_map: &TermMap<Frequency>, doc: &str) -> Score {
         let dv = self.document_vectors.get(doc);
         let qv = VectorModelScorer::make_document_vector(self.indexer, &term_freq_map);
 
@@ -62,4 +55,12 @@ impl<'a> VectorModelScorer<'a> {
             0.0
         }
     }
+}
+
+pub fn tf_idf_formula(tf: usize, df: usize, n: usize) -> Weight {
+    tf as f64 * idf_formula(df, n)
+}
+
+pub fn idf_formula(df: usize, n: usize) -> f64 {
+    if df == 0 { 0.0 } else { f64::log10(n as f64 / df as f64) }
 }

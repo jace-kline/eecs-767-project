@@ -66,6 +66,20 @@ where
     v
 }
 
+pub fn print_nested_maps<K1, K2, V>(map: &BTreeMap<K1,BTreeMap<K2, V>>)
+where
+    K1: Debug,
+    K2: Debug,
+    V: Debug
+{
+    for (k1, submap) in map.iter() {
+        println!("{:?} ->", k1);
+        for (k2, v) in submap.iter() {
+            println!("\t{:?} -> {:?}", k2, v);
+        }
+    }
+}
+
 #[test]
 fn test_merge_maps() {
     let ml = BTreeMap::from([
