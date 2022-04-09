@@ -1,4 +1,5 @@
-use crate::utils::types::{FilePath, FileInfo, FileMap};
+use super::scrape::{FileInfo};
+use crate::utils::types::{FilePath, FileMap};
 use crate::utils;
 use crate::utils::io::{overwrite_file};
 use std::path::Path;
@@ -22,7 +23,7 @@ pub fn tag_scraped_files(
 
     merged
     .iter()
-    .map(|res| {
+    .map(|res: &MapMergeResult<String, FileInfo, FileInfo>| {
         match res {
             MapMergeResult::Left(k, v) => {
                 (ScrapeTag::New, k.clone(), v.clone())
@@ -47,80 +48,4 @@ pub fn tag_scraped_files(
         }
     })
     .collect::<Vec<(ScrapeTag, FilePath, FileInfo)>>()
-}
-
-#[derive(Debug, PartialEq, PartialOrd, Clone)]
-struct TestFile {
-    name: FilePath,
-    contents: String,
-    indexed: bool,
-}
-
-fn write_test_file<P>(path: &P, f: &TestFile) -> Result<(), Box<dyn Error>> 
-    where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr>,
-{
-    let path = Path::new(&path).join(&f.name);
-    overwrite_file(&path, &f.contents)?;
-    Ok(())
-}
-
-pub fn test_tag_files<P>(path : &P) -> Result<(), Box<dyn Error>>
-    where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr>,
-{
-    // create new dir path/samples
-
-    let testfiles : Vec<TestFile> = vec![
-        TestFile {
-            name: String::from("file1.txt"),
-            contents: String::from("fox jumped over the river"),
-            indexed: true
-        },
-        TestFile {
-            name: String::from("file2.txt"),
-            contents: String::from("dog walked to the tree"),
-            indexed: false
-        },
-        TestFile {
-            name: String::from("file3.txt"),
-            contents: String::from("fox and dog play"),
-            indexed: true
-        },
-        TestFile {
-            name: String::from("file4.txt"),
-            contents: String::from("many trees are by the river"),
-            indexed: false
-        },
-        TestFile {
-            name: String::from("file5.txt"),
-            contents: String::from("dog drinks the river water"),
-            indexed: true
-        },
-        TestFile {
-            name: String::from("file6.txt"),
-            contents: String::from("river water is fun to play in"),
-            indexed: false
-        }
-    ];
-
-    let p = Path::new(path);
-
-    for f in testfiles {
-        write_test_file(&p, &f)?;
-    }
-
-    // populate dir with "ignored" sample files, store map
-
-    // populate dir with "indexed" sample files, store map
-
-    // populate dir with new sample files
-
-    // perform modifications on some ignored & indexed files
-
-    // scrape the modified dir
-
-    // run the file tagging function
-
-    // cleanup the dir
-    
-    Ok(())
 }

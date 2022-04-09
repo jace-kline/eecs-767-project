@@ -1,8 +1,7 @@
 use std::collections::BTreeMap;
-use std::io::{Read};
 use ascii;
 use std::path::Path;
-use std::fs::File;
+use crate::utils::io::parse_from_file;
 use crate::utils::types::{Term, TermMap, Frequency};
 use super::normalize::{case_fold, stemmer, is_stop_word, replace_punctuation_whitespace};
 
@@ -33,11 +32,8 @@ where T: Into<Vec<u8>> + AsRef<[u8]>
 }
 
 // a wrapper around the text_process function for reading from file
-pub fn text_process_file<P>(path: &P) -> Option<TermMap<Frequency>> 
+pub fn text_process_file<P>(path: P) -> Option<TermMap<Frequency>> 
 where P: AsRef<Path>
 {
-    let mut buf = String::new();
-    let mut file = File::open(path).ok()?;
-    file.read_to_string(&mut buf).ok()?;
-    text_process(buf)
+    parse_from_file(path, |input: &str| text_process(input))
 }

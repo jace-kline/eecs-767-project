@@ -1,6 +1,7 @@
 use super::document_vector::*;
 use super::prune::prune;
 use super::vector_model_scorer::*;
+use super::scorer::Scorer;
 use crate::score::vector_model_scorer;
 use crate::text::text_process;
 use crate::index::indexer::Indexer;

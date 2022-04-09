@@ -1,6 +1,7 @@
 use crate::utils::types::{FileMap, TermMap, Weight, Score, Frequency};
 use crate::index::indexer::Indexer;
 use super::document_vector::DocumentVector;
+use super::scorer::Scorer;
 
 
 pub struct VectorModelScorer<'a> {
@@ -33,8 +34,10 @@ impl<'a> VectorModelScorer<'a> {
             .collect::<TermMap<Weight>>()
         )
     }
+}
 
-    pub fn score_query_doc(&self, term_freq_map: &TermMap<Frequency>, doc: &str) -> Score {
+impl<'a> Scorer for VectorModelScorer<'a> {
+    fn score_query_doc(&self, term_freq_map: &TermMap<Frequency>, doc: &str) -> Score {
         let dv = self.document_vectors.get(doc);
         let qv = VectorModelScorer::make_document_vector(self.indexer, &term_freq_map);
 
@@ -45,7 +48,7 @@ impl<'a> VectorModelScorer<'a> {
         }
     }
 
-    pub fn score_doc_doc(&self, doc1: &str, doc2: &str) -> Score {
+    fn score_doc_doc(&self, doc1: &str, doc2: &str) -> Score {
         let dv1 = self.document_vectors.get(doc1);
         let dv2 = self.document_vectors.get(doc2);
 

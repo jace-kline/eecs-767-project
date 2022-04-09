@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use crate::utils::types::{Term, FilePath, FileMap, TermMap, Frequency};
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct Indexer {
     pub term_file_index: TermMap<FileMap<Frequency>>,
     pub file_term_index: FileMap<TermMap<Frequency>>
