@@ -9,3 +9,5 @@ edition = "2021"
 walkdir = "2"
 filetime = "0.2"
 ascii = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"

@@ -1,15 +1,14 @@
-use crate::types::{FilePath, FileMap, FileInfo, ScrapeResult, ScrapeTag};
 use crate::utils::map::merge_maps;
 use crate::utils::io::{overwrite_file};
 use std::path::Path;
 use std::error::Error;
 use crate::utils::map::MapMergeResult;
-use crate::types::{IndexTag, StoredFileInfo};
+use crate::types::*;
 
 pub fn scrape_diff(
     scraped: &FileMap<FileInfo>,
     stored: &FileMap<StoredFileInfo>
-) -> Vec<ScrapeResult> {
+) -> Vec<ScrapeDiffRecord> {
     let merged = merge_maps(scraped, stored);
 
     merged
@@ -17,7 +16,7 @@ pub fn scrape_diff(
     .map(|res: MapMergeResult<String, FileInfo, StoredFileInfo>| {
         match res {
             MapMergeResult::Left(k, v) => {
-                ScrapeResult::new(ScrapeTag::New, k, v)
+                ScrapeDiffRecord::new(ScrapeTag::New, k, v)
             }
             MapMergeResult::Right(k, StoredFileInfo(t, v)) => {
                 let tag = 
@@ -25,7 +24,7 @@ pub fn scrape_diff(
                         IndexTag::Indexed => ScrapeTag::IndexedRemoved,
                         IndexTag::Ignored => ScrapeTag::IgnoredRemoved
                     };
-                ScrapeResult::new(tag, k, v)
+                    ScrapeDiffRecord::new(tag, k, v)
             }
             MapMergeResult::Conflict(k, vl, StoredFileInfo(t, vr)) => {
                 let tag =
@@ -39,9 +38,9 @@ pub fn scrape_diff(
                             else { ScrapeTag::IgnoredRemoved }
                         }
                     };
-                ScrapeResult::new(tag, k, vl)
+                    ScrapeDiffRecord::new(tag, k, vl)
             }
         }
     })
-    .collect::<Vec<ScrapeResult>>()
+    .collect::<Vec<ScrapeDiffRecord>>()
 }

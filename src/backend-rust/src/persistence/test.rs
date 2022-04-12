@@ -58,6 +58,6 @@ fn test_parse_output_index() {
 }
 
 #[test]
-fn test_savefile() {
+fn test_serde() {
 
 }

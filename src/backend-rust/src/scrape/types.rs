@@ -1,6 +1,7 @@
 use crate::types::{FilePath};
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct FileInfo {
     pub fname: String,
     pub size: u64,
@@ -18,13 +19,13 @@ pub enum ScrapeTag {
 }
 
 #[derive(Debug, Clone)]
-pub struct ScrapeResult {
+pub struct ScrapeDiffRecord {
     pub tag: ScrapeTag, 
     pub path: FilePath, 
     pub info: FileInfo
 }
 
-impl ScrapeResult {
+impl ScrapeDiffRecord {
     pub fn new(tag: ScrapeTag, path: FilePath, info: FileInfo) -> Self {
         Self {
             tag,

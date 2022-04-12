@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 use crate::types::*;
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Index {
     pub file_info_index: FileMap<StoredFileInfo>,
     pub term_file_index: TermMap<FileMap<Frequency>>,
