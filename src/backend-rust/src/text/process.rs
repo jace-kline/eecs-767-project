@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use ascii;
 use std::path::Path;
 use crate::utils::io::parse_from_file;
-use crate::utils::types::{Term, TermMap, Frequency};
+use crate::types::{Term, TermMap, Frequency};
 use super::normalize::{case_fold, stemmer, is_stop_word, replace_punctuation_whitespace};
 
 // produce [term -> freq] mappings for some document/query

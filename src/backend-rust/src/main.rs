@@ -1,4 +1,5 @@
 
+pub mod types;
 pub mod scrape;
 pub mod utils;
 pub mod persistence;

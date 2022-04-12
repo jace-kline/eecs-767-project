@@ -1,13 +1,14 @@
 use std::collections::BTreeMap;
 use std::fmt::Debug;
-use super::indexer::*;
+use super::index::*;
+use crate::types::*;
 use crate::text::process::text_process;
 use crate::utils::map::print_nested_maps;
 
 #[test]
 fn indexer_add_test() {
 
-    let mut indexer = Indexer::new();
+    let mut indexer = Index::new();
 
     let files = vec![
         ("file1.txt", "Once upon a time there was a squirrel squirrel squirrel"),

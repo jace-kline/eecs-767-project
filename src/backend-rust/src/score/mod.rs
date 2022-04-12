@@ -1,6 +1,6 @@
 
+pub mod types;
 pub mod scorer;
-pub mod document_vector;
-pub mod vector_model_scorer;
+pub mod vector_model;
 pub mod prune;
 mod test;

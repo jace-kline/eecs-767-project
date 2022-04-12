@@ -1,17 +1,19 @@
 use std::collections::BTreeMap;
 use std::str::FromStr;
 use std::fmt::Display;
-use crate::index::indexer::Indexer;
+use crate::types::Index;
 use super::persist::Persist;
 
-impl Persist for Indexer {
+impl Persist for Index {
     fn loads(s: &str) -> Option<Self> {
         let (file_term_str, term_file_str) = s.split_once("\n---\n")?;
+        let file_info_index = BTreeMap::new();
         let file_term_index = parse_nested_map(file_term_str)?;
         let term_file_index = parse_nested_map(term_file_str)?;
 
         Some(
-            Indexer {
+            Index {
+                file_info_index,
                 file_term_index,
                 term_file_index
             }

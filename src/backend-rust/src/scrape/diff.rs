@@ -1,51 +1,47 @@
-use super::scrape::{FileInfo};
-use crate::utils::types::{FilePath, FileMap};
-use crate::utils;
+use crate::types::{FilePath, FileMap, FileInfo, ScrapeResult, ScrapeTag};
+use crate::utils::map::merge_maps;
 use crate::utils::io::{overwrite_file};
 use std::path::Path;
 use std::error::Error;
 use crate::utils::map::MapMergeResult;
+use crate::types::{IndexTag, StoredFileInfo};
 
-pub enum ScrapeTag {
-    New,   // for new files that should be parsed/indexed OR previously ignored files that have been modified
-    Indexed, // for files that match previously stored files
-    IndexedRemoved, // for stored files that have been moved / no longer exist
-    IndexedModified, // for stored files that match stored path, but not attrs
-    Ignored, // for stored files that we have identified should not be parsed/indexed based on stored ignored list
-    IgnoredRemoved
-}
-
-pub fn tag_scraped_files(
+pub fn scrape_diff(
     scraped: &FileMap<FileInfo>,
-    stored: &FileMap<FileInfo>
-) -> Vec<(ScrapeTag, FilePath, FileInfo)> {
-    let merged = utils::map::merge_maps(scraped, stored);
+    stored: &FileMap<StoredFileInfo>
+) -> Vec<ScrapeResult> {
+    let merged = merge_maps(scraped, stored);
 
     merged
-    .iter()
-    .map(|res: &MapMergeResult<String, FileInfo, FileInfo>| {
+    .into_iter()
+    .map(|res: MapMergeResult<String, FileInfo, StoredFileInfo>| {
         match res {
             MapMergeResult::Left(k, v) => {
-                (ScrapeTag::New, k.clone(), v.clone())
+                ScrapeResult::new(ScrapeTag::New, k, v)
             }
-            MapMergeResult::Right(k, v) => {
+            MapMergeResult::Right(k, StoredFileInfo(t, v)) => {
                 let tag = 
-                    if v.indexed { ScrapeTag::IndexedRemoved } 
-                    else { ScrapeTag::IgnoredRemoved };
-                (tag, k.clone(), v.clone())
-            }
-            MapMergeResult::Conflict(k, vl, vr) => {
-                let tag =
-                    if vr.indexed {
-                        if vl == vr { ScrapeTag::Indexed }
-                        else { ScrapeTag::IndexedModified }
-                    } else {
-                        if vl == vr { ScrapeTag::Ignored }
-                        else { ScrapeTag::IgnoredRemoved }
+                    match t {
+                        IndexTag::Indexed => ScrapeTag::IndexedRemoved,
+                        IndexTag::Ignored => ScrapeTag::IgnoredRemoved
                     };
-                (tag, k.clone(), vl.clone())
+                ScrapeResult::new(tag, k, v)
+            }
+            MapMergeResult::Conflict(k, vl, StoredFileInfo(t, vr)) => {
+                let tag =
+                    match t {
+                        IndexTag::Indexed => {
+                            if vl == vr { ScrapeTag::Indexed }
+                            else { ScrapeTag::IndexedModified }
+                        }
+                        IndexTag::Ignored => {
+                            if vl == vr { ScrapeTag::Ignored }
+                            else { ScrapeTag::IgnoredRemoved }
+                        }
+                    };
+                ScrapeResult::new(tag, k, vl)
             }
         }
     })
-    .collect::<Vec<(ScrapeTag, FilePath, FileInfo)>>()
+    .collect::<Vec<ScrapeResult>>()
 }

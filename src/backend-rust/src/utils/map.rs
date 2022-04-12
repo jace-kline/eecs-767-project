@@ -1,12 +1,9 @@
 use std::collections::BTreeMap;
 use std::fmt::Debug;
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum MapMergeResult<K,L,R> 
-where 
-    K: Eq + Ord + Clone + Debug, 
-    L: Clone, 
-    R: Clone,
+where K: Eq + Ord, 
 {
     Left(K, L),
     Right(K, R),
@@ -15,9 +12,9 @@ where
 
 pub fn merge_maps<K,L,R>(ml: &BTreeMap<K,L>, mr: &BTreeMap<K,R>) -> Vec<MapMergeResult<K,L,R>>
 where 
-    K: Eq + Ord + Clone + Debug, 
-    L: Clone, 
-    R: Clone,
+    K: Eq + Ord + Clone,
+    L: Clone,
+    R: Clone
 {
     let mut v : Vec<MapMergeResult<K,L,R>> = Vec::new();
 

@@ -1,4 +1,4 @@
-use crate::utils::types::{Term};
+use crate::types::{Term};
 
 // returns true if c in ({A..Z} U {a..z} U {0..9})
 fn is_alphanumeric(b: char) -> bool {

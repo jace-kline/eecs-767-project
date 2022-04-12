@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use std::fs::remove_file;
 use super::index::*;
 use super::scrape::*;
-use crate::index::indexer::Indexer;
+use crate::types::Index;
 use crate::utils::map::print_nested_maps;
 use crate::text::text_process;
 use super::persist::*;
@@ -39,20 +39,25 @@ fn test_parse_output_index() {
         ("file3.txt", "The forest was full full of tree and squirrel")
     ];
 
-    let indexer = 
+    let index = 
         files.iter()
-        .fold(Indexer::new(), |mut indexer: Indexer, (path, contents)| {
+        .fold(Index::new(), |mut index: Index, (path, contents)| {
             let processed = text_process(*contents).expect("Text processing failed");
-            indexer.add(*path, processed);
-            indexer
+            index.add(*path, processed);
+            index
         });
 
     // print!("{}", &indexer.dumps());
     let store_path = "./index.txt";
-    indexer.dumpf(&store_path).expect("Could not dump index to file");
-    let indexer2 = Indexer::loadf(&store_path).expect("Could not read from dumped index file");
-    assert_eq!(indexer, indexer2);
+    index.dumpf(&store_path).expect("Could not dump index to file");
+    let indexer2 = Index::loadf(&store_path).expect("Could not read from dumped index file");
+    assert_eq!(index, indexer2);
 
     // clean up
     remove_file(store_path).expect("Could not delete file");
+}
+
+#[test]
+fn test_savefile() {
+
 }

@@ -1,17 +1,7 @@
 use std::fmt::{Debug};
 use filetime::{FileTime};
 use walkdir::{WalkDir, DirEntry};
-use crate::utils::types::{FileMap, FilePath};
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct FileInfoMap(FileMap<FileInfo>);
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub struct FileInfo {
-    pub size: u64,
-    pub modified: i64,
-    pub indexed: bool, // assume this is true to start with
-}
+use crate::types::{FileInfo, FileMap, FilePath};
 
 fn mk_fileinfo(entry: DirEntry) -> Option<(FilePath, FileInfo)> {
 
@@ -21,6 +11,7 @@ fn mk_fileinfo(entry: DirEntry) -> Option<(FilePath, FileInfo)> {
     let metadata: std::fs::Metadata = entry.metadata().ok()?;
     // convert path to canonical form (from root)
     let pathbuf = entry.into_path().canonicalize().ok()?;
+    let fname = pathbuf.as_path().file_name()?.to_str()?.to_string();
     let pathstr = pathbuf.as_os_str().to_str()?;
     let path = String::from(pathstr);
 
@@ -39,9 +30,9 @@ fn mk_fileinfo(entry: DirEntry) -> Option<(FilePath, FileInfo)> {
     (exists && is_regular).then(||
         (path,
             FileInfo {
+                fname,
                 size,
-                modified,
-                indexed: true
+                modified
             }
         )
     )

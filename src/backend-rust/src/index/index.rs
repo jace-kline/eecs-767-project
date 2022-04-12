@@ -1,16 +1,18 @@
 use std::collections::BTreeMap;
-use crate::utils::types::{Term, FilePath, FileMap, TermMap, Frequency};
+use crate::types::*;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Indexer {
+pub struct Index {
+    pub file_info_index: FileMap<StoredFileInfo>,
     pub term_file_index: TermMap<FileMap<Frequency>>,
     pub file_term_index: FileMap<TermMap<Frequency>>
 }
 
-impl Indexer {
+impl Index {
 
     pub fn new() -> Self {
-        Self { 
+        Self {
+            file_info_index: BTreeMap::new(),
             term_file_index: BTreeMap::new(), 
             file_term_index: BTreeMap::new() 
         }
