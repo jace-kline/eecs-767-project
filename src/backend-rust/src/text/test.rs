@@ -21,7 +21,7 @@ fn test_text_process_file() {
     // create a file
     let path = String::from("./test.txt");
     let contents = "Hello,,,,,,, I am-the-greatest-ever the the a a run bike swim RUN BIKE SWIM. wow,punctuation,is,crazy!!";
-    overwrite_file(&path, contents).expect("Could not write file");
+    overwrite_file(&path, contents.as_bytes()).expect("Could not write file");
 
     if let Some(map) = text_process_file(&path) {
         for (term, freq) in map {

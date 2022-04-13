@@ -12,12 +12,12 @@ where P: AsRef<Path>,
     Ok(io::BufReader::new(file).lines())
 }
 
-pub fn overwrite_file<P>(path: P, contents: &str) -> io::Result<()> 
+pub fn overwrite_file<P>(path: P, contents: &[u8]) -> io::Result<()> 
 where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr>,
 {
     let file = File::create(&path)?;
     let mut file = BufWriter::new(file);
-    file.write_all(contents.as_bytes())?;
+    file.write_all(contents)?;
     Ok(())
 }
 

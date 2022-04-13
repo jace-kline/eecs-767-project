@@ -1,5 +1,5 @@
 use std::io::{BufReader};
-use std::iter::zip;
+use std::time::Instant;
 use std::{path::Path, fs::File};
 use crate::text::text_process_file;
 use crate::types::*;
@@ -12,20 +12,34 @@ pub fn load_index_file<P>(stored_index_path: P) -> Option<Index>
 where P: AsRef<Path> {
     let file = File::open(stored_index_path).ok()?;
     let reader = BufReader::new(file);
-    serde_json::from_reader(reader).ok()
+    // serde_json::from_reader(reader).ok()
+    bson::from_reader(reader).ok()
+}
+
+pub fn write_index_file<P>(index: &Index, stored_index_path: P) -> Option<()>
+where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr> + Copy {
+    // let output = serde_json::to_string(index).ok()?;
+    let output = bson::to_vec(index).ok()?;
+    overwrite_file(stored_index_path, &output).ok()?;
+    Some(())
 }
 
 pub fn build_index<P>(scrape_root: P, stored_index_path: P) -> Index
-where P: AsRef<Path>
+where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr> + Copy
 {
+    let mut t = Instant::now();
     let scraped = scrape_files(scrape_root);
+    println!("Scrape: {:.2?}", t.elapsed());
 
+    t = Instant::now();
     // if index can be read/deserialized, then do it
     // otherwise, create empty index
     let mut index = 
         load_index_file(stored_index_path)
         .unwrap_or(Index::new());
+    println!("Load Index: {:.2?}", t.elapsed());
 
+    t = Instant::now();
     // if new index, all scraped paths are considered 'New'
     let diffs = 
         if index.file_info_index.is_empty() {
@@ -38,8 +52,9 @@ where P: AsRef<Path>
         } else {
             scrape_diff(&scraped, &index.file_info_index)
         };
+    println!("Diff: {:.2?}", t.elapsed());
 
-    
+    t = Instant::now();
     diffs
     .into_iter()
     // attempt to text-process new/modified files
@@ -90,32 +105,34 @@ where P: AsRef<Path>
             }
         }
     });
+    println!("Update Index: {:.2?}", t.elapsed());
+
+    t = Instant::now();
+    // write updated index to file
+    write_index_file(&index, stored_index_path);
+    println!("Store Index: {:.2?}", t.elapsed());
 
     index
 }
 
 #[test]
-fn test_build_index_1() {
+fn test_build_index_0() {
     let scrape_root = "/home/jacekline/dev/eecs-767/eecs-767-project/stories-modify";
-    let stored_index_path = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/storage/index.json";
+    let stored_index_path = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/storage/index.bson";
 
     let index = build_index(scrape_root, stored_index_path);
-    let output = serde_json::to_string(&index).expect("Couldn't write index to JSON string");
-    overwrite_file(stored_index_path, &output).expect("Couldn't write JSON index file");
 
-    let index_in = load_index_file(stored_index_path).expect("Couldn't read JSON index file");
-    assert_eq!(index, index_in)
+    // let index_in = load_index_file(stored_index_path).expect("Couldn't read JSON index file");
+    // assert_eq!(index, index_in)
 }
 
 #[test]
-fn test_build_index_2() {
+fn test_build_index_1() {
     let scrape_root = "/home/jacekline/dev/eecs-767/eecs-767-project/stories-modify";
-    let stored_index_path = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/storage/index.json";
+    let stored_index_path = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/storage/index.bson";
 
     let index = build_index(scrape_root, stored_index_path);
-    let output = serde_json::to_string(&index).expect("Couldn't write index to JSON string");
-    overwrite_file(stored_index_path, &output).expect("Couldn't write JSON index file");
 
     let index_rebuild = build_index(scrape_root, stored_index_path);
-    assert_eq!(index, index_rebuild)
+    assert_eq!(index, index_rebuild);
 }
