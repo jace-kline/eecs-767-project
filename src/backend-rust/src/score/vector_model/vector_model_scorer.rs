@@ -1,12 +1,12 @@
 use crate::types::*;
 
 pub struct VectorModelScorer<'a> {
-    pub index: &'a Index,
+    pub index: &'a FrequencyIndex,
     pub document_vectors: FileMap<DocumentVector>
 }
 
 impl<'a> VectorModelScorer<'a> {
-    pub fn new(index: &'a Index) -> Self {
+    pub fn new(index: &'a FrequencyIndex) -> Self {
 
         // compute document vectors
         let document_vectors = index.file_term_index.iter().map(|(doc, term_freq_map)| {
@@ -21,7 +21,7 @@ impl<'a> VectorModelScorer<'a> {
         }
     }
 
-    fn make_document_vector(index: &Index, term_freq_map: &TermMap<Frequency>) -> DocumentVector {
+    fn make_document_vector(index: &FrequencyIndex, term_freq_map: &TermMap<Frequency>) -> DocumentVector {
         DocumentVector::new(
             term_freq_map.iter().map(|(term, tf)| {
                 let df = index.df(&term).unwrap_or(0);
