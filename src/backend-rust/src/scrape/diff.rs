@@ -16,17 +16,17 @@ pub fn scrape_diff(
     .map(|res: MapMergeResult<String, FileInfo, StoredFileInfo>| {
         match res {
             MapMergeResult::Left(k, v) => {
-                ScrapeDiffRecord::new(ScrapeTag::New, k, v)
+                (ScrapeTag::New, k, v)
             }
-            MapMergeResult::Right(k, StoredFileInfo(t, v)) => {
+            MapMergeResult::Right(k, (t, v)) => {
                 let tag = 
                     match t {
                         IndexTag::Indexed => ScrapeTag::IndexedRemoved,
                         IndexTag::Ignored => ScrapeTag::IgnoredRemoved
                     };
-                    ScrapeDiffRecord::new(tag, k, v)
+                    (tag, k, v)
             }
-            MapMergeResult::Conflict(k, vl, StoredFileInfo(t, vr)) => {
+            MapMergeResult::Conflict(k, vl, (t, vr)) => {
                 let tag =
                     match t {
                         IndexTag::Indexed => {
@@ -38,7 +38,7 @@ pub fn scrape_diff(
                             else { ScrapeTag::IgnoredRemoved }
                         }
                     };
-                    ScrapeDiffRecord::new(tag, k, vl)
+                    (tag, k, vl)
             }
         }
     })

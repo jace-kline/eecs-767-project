@@ -8,5 +8,4 @@ pub enum IndexTag {
     Ignored
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub struct StoredFileInfo(pub IndexTag, pub FileInfo);
+pub type StoredFileInfo = (IndexTag, FileInfo);

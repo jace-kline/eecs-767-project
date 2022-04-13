@@ -18,19 +18,4 @@ pub enum ScrapeTag {
     IgnoredRemoved
 }
 
-#[derive(Debug, Clone)]
-pub struct ScrapeDiffRecord {
-    pub tag: ScrapeTag, 
-    pub path: FilePath, 
-    pub info: FileInfo
-}
-
-impl ScrapeDiffRecord {
-    pub fn new(tag: ScrapeTag, path: FilePath, info: FileInfo) -> Self {
-        Self {
-            tag,
-            path,
-            info
-        }
-    }
-}
+pub type ScrapeDiffRecord = (ScrapeTag, FilePath, FileInfo);
