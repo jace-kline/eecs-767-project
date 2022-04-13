@@ -13,11 +13,34 @@ pub struct Index {
 }
 
 impl Index {
-
     pub fn new() -> Self {
         Self {
             file_info_index: BTreeMap::new(),
             frequency_index: FrequencyIndex::new()
+        }
+    }
+
+    pub fn update(&mut self, opt: IndexUpdate) -> Option<()> {
+        use IndexUpdate::*;
+        match opt {
+            AddIndexed(path, info, map) => { 
+                self.add_indexed(&path, info, map)
+            }
+            AddIgnored(path, info) => {
+                self.add_ignored(&path, info)
+            }
+            ReplaceIndexed(path, info, map) => {
+                self.remove(&path)?;
+                self.add_indexed(&path, info, map)
+            }
+            ReplaceIgnored(path, info) => {
+                self.remove(&path)?;
+                self.add_ignored(&path, info)
+            }
+            Remove(path) => {
+                self.remove(&path)
+            }
+            Skip => { Some(()) }
         }
     }
 

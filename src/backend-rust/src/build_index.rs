@@ -9,20 +9,16 @@ use super::scrape::diff::scrape_diff;
 pub fn build_index<P>(scrape_root: P, stored_index_path: P) -> Index
 where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr> + Copy
 {
-    let mut t = Instant::now();
     let scraped = scrape_files(scrape_root);
-    println!("Scrape: {:.2?}", t.elapsed());
 
-    t = Instant::now();
     // if index can be read/deserialized, then do it
     // otherwise, create empty index
     let mut index = 
         Index::from_file(stored_index_path)
         .unwrap_or(Index::new());
-    println!("Load Index: {:.2?}", t.elapsed());
 
-    t = Instant::now();
     // if new index, all scraped paths are considered 'New'
+    // otherwise, run scrape_diff() against previously stored index
     let diffs = 
         if index.file_info_index.is_empty() {
             scraped
@@ -34,66 +30,61 @@ where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr> + Copy
         } else {
             scrape_diff(&scraped, &index.file_info_index)
         };
-    println!("Diff: {:.2?}", t.elapsed());
 
-    t = Instant::now();
+    // 1. perform text processing on candidate files
+    // 2. map results to index update "actions"
+    // 3. run the update actions on the mutable index
     diffs
-    .into_iter()
-    // attempt to text-process new/modified files
-    .map(|(tag, path, info)| {
-        let term_freqs = match tag {
-            New|IndexedModified => text_process_file(&path),
-            _ => None
-        };
-        (tag, path, info, term_freqs)
-    })
-    .for_each(|(tag, path, info, term_freqs)| {
-        match tag {
-            New => {
-                if let Some(term_freqs) = term_freqs {
-                    // add new indexed entry to index
-                    index.add_indexed(&path, info, term_freqs);
-                } else {
-                    // add new ignored entry to index
-                    index.add_ignored(&path, info);
+        .into_iter()
+        // attempt to text-process new/modified files
+        .map(|(tag, path, info)| {
+            let term_freqs = match tag {
+                New|IndexedModified => text_process_file(&path),
+                _ => None
+            };
+            (tag, path, info, term_freqs)
+        })
+        .filter_map(|(tag, path, info, term_freqs)| {
+            use IndexUpdate::*;
+            match tag {
+                New => {
+                    if let Some(term_freqs) = term_freqs {
+                        // add new indexed entry to index
+                        Some(AddIndexed(path, info, term_freqs))
+                    } else {
+                        // add new ignored entry to index
+                        Some(AddIgnored(path, info))
+                    }
+                }
+                Indexed|Ignored => {
+                    // already correctly in index -> skip
+                    None
+                }
+                IndexedRemoved|IgnoredRemoved => {
+                    // remove path from index
+                    Some(Remove(path))
+                }
+                IndexedModified => {
+
+                    // add new entry to index
+                    if let Some(term_freqs) = term_freqs {
+                        // add new indexed entry to index
+                        Some(ReplaceIndexed(path, info, term_freqs))
+                    } else {
+                        // add new ignored entry to index
+                        Some(ReplaceIgnored(path, info))
+                    }
                 }
             }
-            Indexed => {
-                // already correctly in index -> skip
-            }
-            IndexedRemoved => {
-                // remove path from index
-                index.remove(&path);
-            }
-            IndexedModified => {
-                // remove path from index
-                index.remove(&path);
+        })
+        .for_each(|update| {
+            index.update(update);
+        });
 
-                // add new entry to index
-                if let Some(term_freqs) = term_freqs {
-                    // add new indexed entry to index
-                    index.add_indexed(&path, info, term_freqs);
-                } else {
-                    // add new ignored entry to index
-                    index.add_ignored(&path, info);
-                }
-            }
-            Ignored => {
-                // already correctly in index -> skip
-            }
-            IgnoredRemoved => {
-                // purge path from index
-                index.remove(&path);
-            }
-        }
-    });
-    println!("Update Index: {:.2?}", t.elapsed());
-
-    t = Instant::now();
     // write updated index to file
     index.to_file(stored_index_path);
-    println!("Store Index: {:.2?}", t.elapsed());
 
+    // return the built index
     index
 }
 

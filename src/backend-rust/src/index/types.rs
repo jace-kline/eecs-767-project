@@ -10,3 +10,12 @@ pub enum IndexTag {
 }
 
 pub type StoredFileInfo = (IndexTag, FileInfo);
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum IndexUpdate {
+    AddIndexed(FilePath, FileInfo, TermMap<Frequency>),
+    AddIgnored(FilePath, FileInfo),
+    ReplaceIndexed(FilePath, FileInfo, TermMap<Frequency>),
+    ReplaceIgnored(FilePath, FileInfo),
+    Remove(FilePath)
+}
