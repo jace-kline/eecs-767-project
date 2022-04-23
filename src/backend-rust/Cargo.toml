@@ -12,3 +12,4 @@ ascii = "1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 bson = "2.1.0"
+rocket = { version = "0.5.0-rc.1", features = ["json"] }

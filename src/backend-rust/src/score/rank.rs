@@ -1,5 +1,5 @@
-use std::collections::{BTreeSet, hash_map::RandomState};
-use core::cmp::Ordering;
+use core::{cmp::Ordering};
+use crate::utils::utils;
 use crate::types::*;
 
 fn rank_truncate_scored(scored: Vec<(FilePath, Score)>, num_results: usize) -> Vec<(FilePath, Score)> {
@@ -33,6 +33,26 @@ where
     .collect::<Vec<(FilePath, Score)>>();
 
     rank_truncate_scored(scored, num_results)
+}
+
+pub fn rank_results<S,P>(
+    index: &Index, 
+    scorer: &S, 
+    prune: P, 
+    query: &TermMap<Frequency>, 
+    num_results: usize
+) -> Vec<RankResult>
+where
+    S: Scorer,
+    P: Fn(&Index) -> Vec<FilePath>
+{
+    rank(index, scorer, prune, query, num_results)
+    .into_iter()
+    .map(|(path, score)| RankResult {
+        path,
+        score
+    })
+    .collect()
 }
 
 #[test]

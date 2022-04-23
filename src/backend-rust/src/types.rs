@@ -16,3 +16,4 @@ pub use super::score::types::*;
 pub use super::scrape::types::*;
 // pub use super::text::types::*;
 pub use super::utils::types::*;
+pub use super::api::types::*;
