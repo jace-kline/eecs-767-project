@@ -1,8 +1,7 @@
 use core::{cmp::Ordering};
-use crate::utils::utils;
 use crate::types::*;
 
-fn rank_truncate_scored(scored: Vec<(FilePath, Score)>, num_results: usize) -> Vec<(FilePath, Score)> {
+pub fn rank_truncate_scored(scored: Vec<(FilePath, Score)>, num_results: usize) -> Vec<(FilePath, Score)> {
     let mut scored = scored;
 
     scored.sort_by(|(_,l), (_,r)|
@@ -13,18 +12,18 @@ fn rank_truncate_scored(scored: Vec<(FilePath, Score)>, num_results: usize) -> V
     scored
 }
 
-pub fn rank<S,P>(
-    index: &Index, 
-    scorer: &S, 
+pub fn rank<'a, S,P>(
+    scorer: &S,
     prune: P, 
     query: &TermMap<Frequency>, 
     num_results: usize
-) -> Vec<(FilePath, Score)>
+) -> Vec<RankResult>
 where
-    S: Scorer,
-    P: Fn(&Index) -> Vec<FilePath>
+    S: Scorer<'a>,
+    P: Fn(&Index, &TermMap<Frequency>) -> Vec<FilePath>
 {
-    let scored = prune(index)
+    let index = scorer.get_index();
+    let scored = prune(index, query)
     .into_iter()
     .map(|path| {
         let score = scorer.score_query_doc(query, &path);
@@ -33,20 +32,6 @@ where
     .collect::<Vec<(FilePath, Score)>>();
 
     rank_truncate_scored(scored, num_results)
-}
-
-pub fn rank_results<S,P>(
-    index: &Index, 
-    scorer: &S, 
-    prune: P, 
-    query: &TermMap<Frequency>, 
-    num_results: usize
-) -> Vec<RankResult>
-where
-    S: Scorer,
-    P: Fn(&Index) -> Vec<FilePath>
-{
-    rank(index, scorer, prune, query, num_results)
     .into_iter()
     .map(|(path, score)| RankResult {
         path,

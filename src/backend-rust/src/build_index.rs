@@ -1,12 +1,10 @@
-use std::path::Path;
 use crate::text::text_process_file;
 use crate::types::*;
 use crate::types::ScrapeTag::*;
 use crate::scrape::fs::scrape_files;
 use super::scrape::diff::scrape_diff;
 
-pub fn build_index<P>(scrape_root: P, stored_index_path: P) -> Index
-where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr> + Copy
+pub fn build_index(scrape_root: &str, stored_index_path: &str) -> Index
 {
     let scraped = scrape_files(scrape_root);
 

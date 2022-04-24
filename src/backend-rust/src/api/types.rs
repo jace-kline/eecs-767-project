@@ -20,3 +20,8 @@ pub struct QueryRequest {
     pub num_results: usize,
     pub relevant: Option<FilePath>
 }
+
+// pub struct ApiState<'a> {
+//     pub index: Index,
+//     pub scorer: VectorModelScorer<'a>
+// }

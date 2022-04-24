@@ -9,14 +9,14 @@ pub struct DocumentVector {
     pub magnitude: f64
 }
 
-pub fn rocchio(v: &DocumentVector, relevant: &[DocumentVector]) -> DocumentVector {
+pub fn rocchio(v: &DocumentVector, relevant: &[&DocumentVector]) -> DocumentVector {
     let alpha = 0.5;
     let beta = 0.5;
 
     v.multiply_scalar(alpha).add(&centroid(relevant).multiply_scalar(beta))
 }
 
-pub fn centroid(vs: &[DocumentVector]) -> DocumentVector {
+pub fn centroid(vs: &[&DocumentVector]) -> DocumentVector {
     if vs.len() == 0 { 
         DocumentVector::zero()
     } else {
@@ -24,7 +24,7 @@ pub fn centroid(vs: &[DocumentVector]) -> DocumentVector {
 
         let v: DocumentVector = 
             vs.iter()
-            .fold(DocumentVector::zero(), |v, v_| v.add(v_));
+            .fold(DocumentVector::zero(), |v, v_| v.add(*v_));
         
         v.multiply_scalar(multiplier)
     }

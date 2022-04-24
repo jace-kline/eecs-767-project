@@ -1,16 +1,17 @@
 use crate::types::*;
+use super::document_vector;
 
 pub struct VectorModelScorer<'a> {
-    pub index: &'a FrequencyIndex,
+    pub index: &'a Index,
     pub document_vectors: FileMap<DocumentVector>
 }
 
 impl<'a> VectorModelScorer<'a> {
-    pub fn new(index: &'a FrequencyIndex) -> Self {
+    pub fn new(index: &'a Index) -> Self {
 
         // compute document vectors
-        let document_vectors = index.file_term_index.iter().map(|(doc, term_freq_map)| {
-            let dv = VectorModelScorer::make_document_vector(index, term_freq_map);
+        let document_vectors = index.frequency_index.file_term_index.iter().map(|(doc, term_freq_map)| {
+            let dv = VectorModelScorer::make_document_vector(&index.frequency_index, term_freq_map);
             (doc.to_string(), dv)
         })
         .collect::<FileMap<DocumentVector>>();
@@ -30,18 +31,33 @@ impl<'a> VectorModelScorer<'a> {
             .collect::<TermMap<Weight>>()
         )
     }
-}
 
-impl<'a> Scorer for VectorModelScorer<'a> {
-    fn score_query_doc(&self, term_freq_map: &TermMap<Frequency>, doc: &str) -> Score {
+    fn score_document_vector(&self, qv: &DocumentVector, doc: &str) -> Score {
         let dv = self.document_vectors.get(doc);
-        let qv = VectorModelScorer::make_document_vector(self.index, &term_freq_map);
+        // let qv = VectorModelScorer::make_document_vector(&self.index.frequency_index, &term_freq_map);
 
         if let Some(dv) = dv {
             dv.cosine_similarity(&qv)
         } else {
             0.0
         }
+    }
+}
+
+impl<'a> Scorer<'a> for VectorModelScorer<'a> {
+
+    fn mk_from_index(index: &'a Index) -> Self {
+        Self::new(index)
+    }
+
+    fn get_index(&self) -> &'a Index {
+        self.index
+    }
+
+    fn score_query_doc(&self, term_freq_map: &TermMap<Frequency>, doc: &str) -> Score {
+        let qv = VectorModelScorer::make_document_vector(&self.index.frequency_index, &term_freq_map);
+
+        self.score_document_vector(&qv, doc)
     }
 
     fn score_doc_doc(&self, doc1: &str, doc2: &str) -> Score {
@@ -54,6 +70,60 @@ impl<'a> Scorer for VectorModelScorer<'a> {
             0.0
         }
     }
+
+    fn rank(
+        &self,
+        processed_query: &TermMap<Frequency>,
+        num_results: usize
+    ) -> Vec<RankResult> {
+        crate::score::rank::rank(
+            self,
+            crate::score::prune::prune,
+            processed_query,
+            num_results
+        )
+    }
+
+    fn rank_feedback(
+        &self, 
+        processed_query: &TermMap<Frequency>, 
+        num_results: usize, 
+        relevant: &[FilePath]
+    ) -> Vec<RankResult> {
+        use crate::score::prune::prune;
+        use crate::score::rank::rank_truncate_scored;
+
+        let qv = VectorModelScorer::make_document_vector(&self.index.frequency_index, processed_query);
+
+        // get the document vectors for each "relevant" path
+        // simply ignore any unfound path keys
+        let relevant_dvs = relevant.iter().filter_map(|path| {
+            self.document_vectors.get(path)
+        })
+        .collect::<Vec<&DocumentVector>>();
+
+        // perform Rocchio vector adjustment on the query vector
+        let qv_feedback = document_vector::rocchio(&qv, &relevant_dvs);
+
+        let scored = prune(self.index, processed_query)
+        .into_iter()
+        .map(|path| {
+            let score = self.score_document_vector(&qv_feedback, &path);
+            (path, score)
+        })
+        .collect::<Vec<(FilePath, Score)>>();
+
+        rank_truncate_scored(scored, num_results)
+        .into_iter()
+        .map(|(path, score)| RankResult {
+            path,
+            score
+        })
+        .collect()
+
+    }
+
+
 }
 
 pub fn tf_idf_formula(tf: usize, df: usize, n: usize) -> Weight {
