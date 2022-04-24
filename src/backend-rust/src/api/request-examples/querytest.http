@@ -2,7 +2,7 @@ POST http://localhost:8000/query/
 Content-Type: application/json
 
 {
-    "query": "ku basketball rock chalk",
+    "query": "pigs little",
     "num_results": 20,
     "relevant": null
 }

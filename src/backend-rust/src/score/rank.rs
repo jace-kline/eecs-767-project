@@ -12,21 +12,21 @@ pub fn rank_truncate_scored(scored: Vec<(FilePath, Score)>, num_results: usize) 
     scored
 }
 
-pub fn rank<'a, S,P>(
+pub fn rank<S,P>(
     scorer: &S,
+    index: &Index,
     prune: P, 
     query: &TermMap<Frequency>, 
     num_results: usize
 ) -> Vec<RankResult>
 where
-    S: Scorer<'a>,
+    S: Scorer,
     P: Fn(&Index, &TermMap<Frequency>) -> Vec<FilePath>
 {
-    let index = scorer.get_index();
     let scored = prune(index, query)
     .into_iter()
     .map(|path| {
-        let score = scorer.score_query_doc(query, &path);
+        let score = scorer.score_query_doc(index, query, &path);
         (path, score)
     })
     .collect::<Vec<(FilePath, Score)>>();

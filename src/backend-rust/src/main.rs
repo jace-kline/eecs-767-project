@@ -9,7 +9,7 @@ pub mod score;
 pub mod build_index;
 pub mod api;
 
-use std::{env, sync::Mutex};
+use std::{env};
 use crate::build_index::build_index;
 use api::routes::*;
 use types::*;
@@ -30,19 +30,20 @@ const _stored_index_path: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/
 #[rocket::main]
 async fn main() {
     // get command-line args (scrape_root, stored_index_path)
-    let (scrape_root, stored_index_path) = get_args();
-    // println!("{:?}", (&scrape_root, &stored_index_path));
-
+    // let (scrape_root, stored_index_path) = get_args();
+    let (scrape_root, stored_index_path) = (_scrape_root, _stored_index_path);
 
     // create index by scraping and merging with existing stored index
     // save the modifications to stored_index_path
     let index = build_index(&scrape_root, &stored_index_path);
+    let scorer = VectorModelScorer::new(&index);
+    let state = ApiState::new(index, scorer);
 
     // run the webserver
-    // supply the scorer reference as state to be managed
+    // supply the state to be managed
     rocket::build()
-    .mount("/", routes![root_handler])
-    .manage(index)
+    .mount("/", routes![root_handler, query_handler])
+    .manage(state)
     .launch()
     .await
     .unwrap();

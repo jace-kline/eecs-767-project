@@ -10,18 +10,32 @@ pub struct RankResult {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct QueryResponse {
-    pub documents: Vec<RankResult>,
-    pub normalized_query: String
+    pub documents: Vec<RankResult>
+}
+
+impl QueryResponse {
+    pub fn new(documents: Vec<RankResult>) -> Self {
+        Self { documents }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct QueryRequest {
     pub query: String,
     pub num_results: usize,
-    pub relevant: Option<FilePath>
+    pub relevant: Option<Vec<FilePath>>
 }
 
-// pub struct ApiState<'a> {
-//     pub index: Index,
-//     pub scorer: VectorModelScorer<'a>
-// }
+pub struct ApiState {
+    pub index: Index,
+    pub scorer: VectorModelScorer
+}
+
+impl ApiState {
+    pub fn new(index: Index, scorer: VectorModelScorer) -> Self {
+        Self {
+            index,
+            scorer
+        }
+    }
+}
