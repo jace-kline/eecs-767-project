@@ -1,4 +1,5 @@
 #[macro_use] extern crate rocket;
+use rocket::fs::FileServer;
 
 pub mod types;
 pub mod scrape;
@@ -25,7 +26,7 @@ pub fn get_args() -> (String, String) {
 }
 
 const _scrape_root: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/stories-modify";
-const _stored_index_path: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend-rust/storage/index.bson";
+const _stored_index_path: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend/storage/index.bson";
 
 #[rocket::main]
 async fn main() {
@@ -42,7 +43,9 @@ async fn main() {
     // run the webserver
     // supply the state to be managed
     rocket::build()
-    .mount("/", routes![root_handler, query_handler])
+    .attach(CORS)
+    .mount("/document", FileServer::from("/"))
+    .mount("/", routes![options_handler, query_handler])
     .manage(state)
     .launch()
     .await

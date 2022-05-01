@@ -29,7 +29,7 @@ where T: Into<String>
 pub fn stemmer<T>(token: T) -> Term
 where T: Into<String>
 {
-    token.into()
+    porter_stemmer::stem(&token.into())
 }
 
 // stop word: in stop words list OR len <= 1

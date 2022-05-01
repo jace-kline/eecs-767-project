@@ -1,14 +1,21 @@
+use std::path::PathBuf;
+
 use crate::{types::*, text};
 use rocket::response::status::BadRequest;
 use rocket::serde::json::Json;
 use rocket::State;
+
+#[options("/<_path..>")]
+pub fn options_handler(_path: PathBuf) -> Option<()> {
+    Some(())
+}
 
 #[get("/")]
 pub fn root_handler(state: &State<ApiState>) -> String {
     format!("Number of docs: {}, Number of terms: {}", state.index.frequency_index.num_documents(), state.index.frequency_index.num_terms())
 }
 
-#[post("/query", format = "application/json", data = "<req>")]
+#[post("/api/query", format = "application/json", data = "<req>")]
 pub fn query_handler(req: Json<QueryRequest>, state: &State<ApiState>) -> Result<Json<QueryResponse>, BadRequest<&str>> {
 
     let processed_query = 
