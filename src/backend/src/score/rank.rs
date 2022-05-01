@@ -1,4 +1,5 @@
 use core::{cmp::Ordering};
+use std::collections::BTreeSet;
 use crate::types::*;
 
 pub fn rank_truncate_scored(scored: Vec<(FilePath, Score)>, num_results: usize) -> Vec<(FilePath, Score)> {
@@ -21,7 +22,7 @@ pub fn rank<S,P>(
 ) -> Vec<RankResult>
 where
     S: Scorer,
-    P: Fn(&Index, &TermMap<Frequency>) -> Vec<FilePath>
+    P: Fn(&Index, &TermMap<Frequency>) -> BTreeSet<FilePath>
 {
     let scored = prune(index, query)
     .into_iter()
