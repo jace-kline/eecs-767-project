@@ -10,7 +10,7 @@ pub fn build_index(scrape_root: &str, stored_index_path: &str) -> Index
 
     // if index can be read/deserialized, then do it
     // otherwise, create empty index
-    let mut index = 
+    let mut index =
         Index::from_file(stored_index_path)
         .unwrap_or(Index::new());
 

@@ -15,18 +15,19 @@ use crate::build_index::build_index;
 use api::routes::*;
 use types::*;
 
+const _scrape_root: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/test-documents";
+const _stored_index_path: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend/storage/index.bson";
+
 pub fn get_args() -> (String, String) {
     let args: Vec<String> = env::args().collect();
     if args.len() < 3 {
-        panic!("Usage: ./<prog> <scrape_root> <stored_index_path>");
+        let progname = args.get(0).unwrap();
+        panic!("Usage: {} <scrape_root> <stored_index_path>", progname);
     }
     let scrape_root = args.get(1).unwrap().to_owned();
     let stored_index_path = args.get(2).unwrap().to_owned();
     (scrape_root, stored_index_path)
 }
-
-const _scrape_root: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/stories-modify";
-const _stored_index_path: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend/storage/index.bson";
 
 #[rocket::main]
 async fn main() {

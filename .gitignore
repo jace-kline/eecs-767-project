@@ -4,6 +4,7 @@ test
 **/.vscode
 *trec*
 *stories*
+*test-documents*
 **/target
 *.lock
 **storage**
