@@ -33,12 +33,13 @@ pub struct RankResult {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct QueryResponse {
-    pub documents: Vec<RankResult>
+    pub vm_results: Vec<RankResult>,
+    pub strsim_results: Vec<RankResult>
 }
 
 impl QueryResponse {
-    pub fn new(documents: Vec<RankResult>) -> Self {
-        Self { documents }
+    pub fn new(vm_results: Vec<RankResult>, strsim_results: Vec<RankResult>) -> Self {
+        Self { vm_results, strsim_results }
     }
 }
 

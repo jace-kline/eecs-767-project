@@ -1,6 +1,5 @@
 use std::path::PathBuf;
-
-use crate::{types::*, text};
+use crate::{types::*, text, score::strsim::str_sim_rank};
 use rocket::response::status::BadRequest;
 use rocket::serde::json::Json;
 use rocket::State;
@@ -23,7 +22,7 @@ pub fn query_handler(req: Json<QueryRequest>, state: &State<ApiState>) -> Result
         .ok_or(BadRequest(Some("Error parsing query")))?;
 
     // if 'relevant' doc paths included, perform ranking with feedback
-    let rank_results = if let Some(relevant) = &req.relevant {
+    let vm_results = if let Some(relevant) = &req.relevant {
         state.scorer.rank_feedback(
             &state.index,
             &processed_query,
@@ -40,5 +39,11 @@ pub fn query_handler(req: Json<QueryRequest>, state: &State<ApiState>) -> Result
         )
     };
 
-    Ok(Json(QueryResponse::new(rank_results)))
+    // rank based on string similarity
+    let strsim_results = str_sim_rank(&state.index, &req.query, req.num_results);
+
+    Ok(Json(QueryResponse {
+        vm_results,
+        strsim_results
+    }))
 }
