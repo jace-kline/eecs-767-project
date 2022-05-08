@@ -10,7 +10,7 @@ pub struct DocumentVector {
 }
 
 pub fn rocchio(v: &DocumentVector, relevant: &[&DocumentVector]) -> DocumentVector {
-    let alpha = 0.5;
+    let alpha = 1.0;
     let beta = 0.5;
 
     v.multiply_scalar(alpha).add(&centroid(relevant).multiply_scalar(beta))
