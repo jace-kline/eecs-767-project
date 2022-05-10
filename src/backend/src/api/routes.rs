@@ -3,6 +3,7 @@ use crate::{types::*, text, score::strsim::str_sim_rank};
 use rocket::response::status::BadRequest;
 use rocket::serde::json::Json;
 use rocket::State;
+use std::time::Instant;
 
 #[options("/<_path..>")]
 pub fn options_handler(_path: PathBuf) -> Option<()> {
@@ -16,6 +17,8 @@ pub fn root_handler(state: &State<ApiState>) -> String {
 
 #[post("/api/query", format = "application/json", data = "<req>")]
 pub fn query_handler(req: Json<QueryRequest>, state: &State<ApiState>) -> Result<Json<QueryResponse>, BadRequest<&str>> {
+
+    let t = Instant::now();
 
     let processed_query = 
         text::text_process(&*req.query)
@@ -40,10 +43,20 @@ pub fn query_handler(req: Json<QueryRequest>, state: &State<ApiState>) -> Result
     };
 
     // rank based on string similarity
-    let strsim_results = str_sim_rank(&state.index, &req.query, req.num_results);
+    // if 
+    let strsim_results = match req.include_strsim {
+        Some(inc) => {
+            if inc { str_sim_rank(&state.index, &req.query, req.num_results) }
+            else { Vec::new() }
+        }
+        _ => Vec::new()
+    };
+    
+    let duration = t.elapsed().as_secs_f64();
 
     Ok(Json(QueryResponse {
         vm_results,
-        strsim_results
+        strsim_results,
+        duration
     }))
 }

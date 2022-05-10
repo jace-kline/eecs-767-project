@@ -1,0 +1,4 @@
+{
+    "scrape_root": "/home/jacekline/dev/eecs-767/eecs-767-project/test-documents",
+    "stored_index_path": "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend/storage/index.bson"
+}

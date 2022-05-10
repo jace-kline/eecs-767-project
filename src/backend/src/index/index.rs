@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::fs::{create_dir_all, canonicalize};
 use crate::types::*;
 use crate::types::IndexTag::*;
 use serde::{Serialize, Deserialize};
@@ -40,7 +41,6 @@ impl Index {
             Remove(path) => {
                 self.remove(&path)
             }
-            Skip => { Some(()) }
         }
     }
 
@@ -88,7 +88,6 @@ impl Index {
     // persistence - store to file
     pub fn to_file<P>(&self, stored_index_path: P) -> Option<()>
     where P: AsRef<Path> + std::convert::AsRef<std::ffi::OsStr> + Copy {
-        // let output = serde_json::to_string(index).ok()?;
         let output = bson::to_vec(self).ok()?;
         overwrite_file(stored_index_path, &output).ok()?;
         Some(())

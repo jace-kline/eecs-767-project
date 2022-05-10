@@ -79,7 +79,9 @@ pub fn build_index(scrape_root: &str, stored_index_path: &str) -> Index
         });
 
     // write updated index to file
-    index.to_file(stored_index_path);
+    if let None = index.to_file(stored_index_path) {
+        println!("Could not save index file to the given path '{}'.", stored_index_path);
+    }
 
     // return the built index
     index
