@@ -16,8 +16,8 @@ use crate::build_index::build_index;
 use api::routes::*;
 use types::*;
 
-const _scrape_root: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/test-documents";
-const _stored_index_path: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend/storage/index.bson";
+// const _scrape_root: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/test-documents";
+// const _stored_index_path: &str = "/home/jacekline/dev/eecs-767/eecs-767-project/src/backend/storage/index.bson";
 
 pub fn get_args() -> (String, String) {
     let args: Vec<String> = env::args().collect();
@@ -35,7 +35,7 @@ pub fn get_args() -> (String, String) {
 async fn main() {
     // get command-line args (scrape_root, stored_index_path)
     // let (scrape_root, stored_index_path) = get_args();
-    let (scrape_root, stored_index_path) = (_scrape_root, _stored_index_path);
+    let (scrape_root, stored_index_path) = get_args();
 
     println!("Scrape Root Path: {}", &scrape_root);
     println!("Index Storage Path: {}", &stored_index_path);

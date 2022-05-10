@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::fs::{create_dir_all, canonicalize};
 use crate::types::*;
 use crate::types::IndexTag::*;
 use serde::{Serialize, Deserialize};
