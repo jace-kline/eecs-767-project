@@ -1,10 +1,4 @@
-*.out
-*.o
-test
 **/.vscode
-*trec*
-*stories*
-*test-documents*
+**/node_modules
 **/target
 *.lock
-**storage**
